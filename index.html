@@ -430,16 +430,6 @@
 
         let currentUser = null, conquered = new Set(), gameLogs = [], isRolling = false, spinTimer = null;
 
-        function handleLogin() {
-            const id = document.getElementById('user-id').value.trim();
-            if(!id) return alert("닉네임을 입력해주세요!");
-            currentUser = id;
-            document.getElementById('login-page').style.display = 'none';
-            document.getElementById('game-page').style.display = 'flex';
-            document.getElementById('display-user').innerText = `👤 ${id}`;
-            loadData(); renderLogs();
-        }
-
         function toggleRoulette() {
             if(isRolling) stopRoulette();
             else startRoulette();
@@ -607,24 +597,41 @@
 // Firebase 서버의 users/닉네임 경로에 저장
             window.fb_set(window.fb_ref(window.fb_db, 'users/' + currentUser), data);
        }
+
+        function handleLogin() {
+            const id = document.getElementById('user-id').value.trim();
+            if(!id) return alert("닉네임을 입력하세요!");
+            
+            currentUser = id;
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('game-page').style.display = 'flex';
+            document.getElementById('display-user').innerText = `👤 ${id}`;
+// 데이터를 먼저 불러오고 화면을 갱신합니다.
+            loadData(); 
+        }
+        
 // 수정된 loadData 함수
         function loadData() {
-            window.fb_get(window.fb_ref(window.fb_db, 'users/' + currentUser)).then((snapshot) => {
+            const userPath = 'users/' + currentUser;
+            window.fb_get(window.fb_ref(window.fb_db, userPath)).then((snapshot) => {
             if (snapshot.exists()) {
-                const data = snapshot.val();
+                console.log("데이터 로드 성공:", data); // 개발자 도구(F12)에서 확인 가능
                 conquered = new Set(data.conquered || []);
                 gameLogs = data.logs || [];
                 updateProgress();
                 renderLogs();
             } else {
 // 신규 유저일 경우 초기화
+                console.log("신규 유저이거나 데이터를 찾을 수 없음");
                 conquered = new Set();
                 gameLogs = [];
                 updateProgress();
                 renderLogs();
-                }
-            });
-        }
+             }
+        }).catch((error) => {
+                console.error("데이터 불러오기 실패:", error);
+        });
+     }
 
     </script>
 </body>
