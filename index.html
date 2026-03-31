@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Meantz 한국여행마블 1.0v</title>
+    <title>Meantz 한국여행마블 1.1v</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <style>
         :root {
@@ -77,7 +77,7 @@
 <body>
 
     <div id="login-page">
-        <h1><span style="color: var(--danger);">M</span>eantz Korea Travel Marble 1.0v</h1>
+        <h1><span style="color: var(--danger);">M</span>eantz Korea Travel Marble 1.1v</h1>
         <p style="opacity:0.9; font-weight:500; margin-bottom:40px;">대한민국 방방곡곡 여행 보드게임</p>
         <div style="width:100%; max-width:300px;">
             <input type="text" id="user-id" placeholder="사용자 닉네임" style="width:100%; padding:18px; border-radius:16px; border:none; margin-bottom:12px; font-size:1.1rem; outline:none; text-align:center; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
@@ -87,7 +87,7 @@
 
     <div id="game-page" style="display:none; flex-direction:column; height:100vh;">
         <header>
-            <div class="header-title">Meantz 한국여행마블 1.0v</div>
+            <div class="header-title">Meantz 한국여행마블 1.1v</div>
             <div style="display:flex; gap:8px;">
                 <button class="btn-sub" style="background:#FFF5F5; color:var(--danger); border-color:#FED7D7;" onclick="resetProgress()">여행지 초기화</button>
                 <button class="btn-sub" onclick="location.reload()">로그아웃</button>
@@ -586,7 +586,7 @@
 
         function showKeyList() { showPopup("🗝️ 황금카드 정보", "• [황금열쇠: 꽝]\n• [황금열쇠: 다시 돌리기] 무효 후 자동 재추첨\n• [황금열쇠: 지정 여행] 전체 지도에서 선택\n• [황금열쇠: 휴식] 지역 정복 없이 휴식\n• [황금열쇠: 예산 제한] 지정된 예산으로 여행\n• [황금열쇠: 교통수단제한] 대중교통만으로 이동\n• [황금열쇠: 현지인 맛집] 현지인 추천 맛집 이용"); }
         function showRules() { showPopup("📜 게임 규칙", "1. 대한민국 지역을 카토그램식으로 나눈 지도형식입니다.\n2. 추첨 결과에 따른 지역을 여행합니다.\n3. 이미 정복한 곳은 다시 정복할 수 없습니다.\n4. 걸린 지역으로 무조건 여행을 떠나야 합니다.\n5. 황금카드는 10%의 확률로 등장합니다.\n6. 당일 여행 황금열쇠에 섬지역에 걸렸을 시 당일 여행은 무효처리 합니다.\n7. 기상악화 등 변수 발생 시 다음 기회로 미룹니다.\n8. 249개 전 지역을 여행하면 완료!"); }
-        function showUpdates() { showPopup("📢 업데이트 v1.0", "• UI/UX 깔끔한 디자인으로 개선\n• 사용자 로그인 시스템 적용"); }
+        function showUpdates() { showPopup("📢 업데이트 v1.1", "• 핸드폰이나 컴퓨터 다른 환경에서 접속해서도 값이 같게 설정\n• 지역에 대한 정보 지속 업데이트"); }
 
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
         function updateProgress() { document.getElementById('display-progress').innerText = `🗺️ 정복: ${conquered.size}/249`; }
