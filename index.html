@@ -136,8 +136,8 @@
 
     <script type="module">
 // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";       
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";       
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -155,12 +155,14 @@
         };
  // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
- // 기존 게임 로직에서 쓸 수 있게 전역 함수로 등록
+        const database = getDatabase(app);
+ // 에러 방지를 위해 window 객체에 확실히 등록
         window.fb_db = database;
         window.fb_ref = ref;
         window.fb_set = set;
         window.fb_get = get;
+
+        console.log("Firebase 준비 완료!");
     </script>
 
     <script>
@@ -588,14 +590,18 @@
 
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
         function updateProgress() { document.getElementById('display-progress').innerText = `🗺️ 정복: ${conquered.size}/249`; }
+// [중요] saveData 함수를 아래 내용으로 교체
         function saveData() {
-            if (!currentUser) return;
+            if (!currentUser || !window.fb_db) return; // Firebase 준비 안 됐으면 중단
+
             const data = {
                 conquered: Array.from(conquered),
                 logs: gameLogs
             };
-// Firebase 서버의 users/닉네임 경로에 저장
-            window.fb_set(window.fb_ref(window.fb_db, 'users/' + currentUser), data);
+// window.fb_ref와 window.fb_set을 사용하여 저장
+            window.fb_set(window.fb_ref(window.fb_db, 'users/' + currentUser), data)
+                .then(() => console.log("저장 성공!"))
+                .catch((e) => console.error("저장 실패:", e));
        }
 
         function handleLogin() {
@@ -612,27 +618,25 @@
         
 // 수정된 loadData 함수
         function loadData() {
-            const userPath = 'users/' + currentUser;
-            window.fb_get(window.fb_ref(window.fb_db, userPath)).then((snapshot) => {
-            if (snapshot.exists()) {
-                console.log("데이터 로드 성공:", data); // 개발자 도구(F12)에서 확인 가능
-                conquered = new Set(data.conquered || []);
-                gameLogs = data.logs || [];
-                updateProgress();
-                renderLogs();
-            } else {
-// 신규 유저일 경우 초기화
-                console.log("신규 유저이거나 데이터를 찾을 수 없음");
-                conquered = new Set();
-                gameLogs = [];
-                updateProgress();
-                renderLogs();
-             }
-        }).catch((error) => {
-                console.error("데이터 불러오기 실패:", error);
-        });
-     }
+            if (!currentUser || !window.fb_db) return;
 
+            window.fb_get(window.fb_ref(window.fb_db, 'users/' + currentUser)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    conquered = new Set(data.conquered || []);
+                    gameLogs = data.logs || [];
+                    updateProgress();
+                    renderLogs();
+                    console.log("데이터 로드 완료");
+                } else {
+                    console.log("기존 데이터 없음 - 초기화");
+                    conquered = new Set();
+                    gameLogs = [];
+                    updateProgress();
+                    renderLogs();
+                }
+            }).catch((e) => console.error("로드 실패:", e));
+        }
     </script>
 </body>
 </html>
