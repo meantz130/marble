@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Meantz Marble v5.3</title>
+    <title>Meantz Korea Travel Marble v1.0</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <style>
         :root {
@@ -72,19 +72,19 @@
 <body>
 
     <div id="login-page">
-        <h1>Meantz Marble</h1>
-        <p style="opacity:0.9; font-weight:500; margin-bottom:40px;">대한민국 249개 지역 정복 모험</p>
+        <h1>Meantz Korea Travel Marble 1.0v</h1>
+        <p style="opacity:0.9; font-weight:500; margin-bottom:40px;">대한민국 방방곡곡 여행 보드게임</p>
         <div style="width:100%; max-width:300px;">
             <input type="text" id="user-id" placeholder="사용자 닉네임" style="width:100%; padding:18px; border-radius:16px; border:none; margin-bottom:12px; font-size:1.1rem; outline:none; text-align:center; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
-            <button class="btn-main" style="background:#fff; color:var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.1);" onclick="handleLogin()">모험 시작하기</button>
+            <button class="btn-main" style="background:#fff; color:var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.1);" onclick="handleLogin()">여행 시작하기</button>
         </div>
     </div>
 
     <div id="game-page" style="display:none; flex-direction:column; height:100vh;">
         <header>
-            <div class="header-title">MEANTZ MARBLE</div>
+            <div class="header-title">MEANTZ KOREA TRAVEL MARBLE 1.0v</div>
             <div style="display:flex; gap:8px;">
-                <button class="btn-sub" style="background:#FFF5F5; color:var(--danger); border-color:#FED7D7;" onclick="resetProgress()">기록 초기화</button>
+                <button class="btn-sub" style="background:#FFF5F5; color:var(--danger); border-color:#FED7D7;" onclick="resetProgress()">초기화</button>
                 <button class="btn-sub" onclick="location.reload()">로그아웃</button>
             </div>
         </header>
@@ -97,20 +97,20 @@
         <div id="main-display">
             <div id="region-info-card">
                 <div id="info-name">어디로 갈까요?</div>
-                <div id="info-desc">추첨 버튼을 눌러 여정을 시작하세요.</div>
+                <div id="info-desc">여행지 추첨하기 버튼을 눌러 여행을 시작하세요.</div>
             </div>
             
             <div id="live-log-container">
-                <div class="log-header">LIVE ACTIVITY LOG</div>
+                <div class="log-header">나의 여행 기록들</div>
                 <div id="live-log-list"></div>
             </div>
         </div>
 
         <div class="controls">
             <div id="roulette-text">READY</div>
-            <button id="roll-btn" class="btn-main" onclick="toggleRoulette()">🎲 여행지 추첨하기</button>
+            <button id="roll-btn" class="btn-main" onclick="toggleRoulette()">🎲 여행지 추첨하기 🎲</button>
             <div class="btn-grid">
-                <button class="btn-sub" onclick="openMap()">🗺️ 전체현황</button>
+                <button class="btn-sub" onclick="openMap()">🗺️ 지도현황</button>
                 <button class="btn-sub" onclick="showKeyList()">🗝️ 황금카드</button>
                 <button class="btn-sub" onclick="showRules()">📜 게임규칙</button>
                 <button class="btn-sub" onclick="showUpdates()">📢 업데이트</button>
@@ -121,7 +121,7 @@
     <div id="modal" class="modal" onclick="closeModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div id="modal-body"></div>
-            <button class="btn-main" style="height:50px; margin-top:20px; font-size:1rem; flex-shrink: 0;" onclick="closeModal()">확인 및 닫기</button>
+            <button class="btn-main" style="height:50px; margin-top:20px; font-size:1rem; flex-shrink: 0;" onclick="closeModal()">닫기</button>
         </div>
     </div>
 
@@ -135,13 +135,13 @@
 
         // 요청하신 로직으로 전면 수정
         const GOLD_KEYS = [
-            { name: "꽝", type: "bad", desc: "운이 나쁘네요! 하지만 멈출 순 없습니다. 뽑힌 곳을 그대로 갑니다." },
-            { name: "다시 돌리기", type: "retry", desc: "행운의 재도전! 지금 결과는 무효로 하고 다시 뽑습니다." },
-            { name: "지정 이동", type: "select", desc: "슈퍼 티켓! 전체 지도에서 원하는 한 곳을 골라 이동하세요." },
-            { name: "하루 쉬어가기", type: "stay", desc: "꿀맛 같은 휴식! 오늘 정복 지역 없이 집에서 쉽니다." },
-            { name: "예산 제한", type: "budget", desc: "짠내 투어! 랜덤 예산 내에서 뽑힌 지역을 여행하세요." },
-            { name: "교통 제한", type: "traffic", desc: "뚜벅이 미션! 대중교통으로만 뽑힌 지역을 여행하세요." },
-            { name: "현지인 추천", type: "local", desc: "정보 없이 떠나기! 현지인 맛집만 이용하며 여행하세요." }
+            { name: "꽝", type: "bad", desc: "꽝! 뽑힌 곳을 그대로 갑니다. 😱" },
+            { name: "다시 돌리기", type: "retry", desc: "행운의 재도전! 지금 결과는 무효로 하고 다시 뽑습니다. 🔄" },
+            { name: "지정 여행", type: "select", desc: "지정 여행 전체 지도에서 원하는 한 곳을 골라 이동하세요. ✈️" },
+            { name: "휴식", type: "stay", desc: "꿀맛 같은 휴식! 이번은 여행 없이 집에서 쉽니다. ☕" },
+            { name: "예산 제한", type: "budget", desc: "짠내 투어! 랜덤 예산 내에서 뽑힌 지역을 여행하세요. 💵" },
+            { name: "교통수단 제한", type: "traffic", desc: "뚜벅이 미션! 대중교통으로만 뽑힌 지역을 여행하세요. 🚌" },
+            { name: "현지인 맛집 추천", type: "local", desc: "정보 없이 떠나기! 현지인 맛집만 이용하며 여행하세요. 🍝" }
         ];
 
         let currentUser = null, conquered = new Set(), gameLogs = [], isRolling = false, spinTimer = null;
@@ -185,13 +185,13 @@
 
         function finalize() {
             isRolling = false;
-            document.getElementById('roll-btn').innerText = "🎲 여행지 추첨하기";
+            document.getElementById('roll-btn').innerText = "🎲 여행지 추첨하기 🎲";
             document.getElementById('roll-btn').classList.remove('btn-stop');
             document.getElementById('snd-stop').play();
 
             const finalId = Math.floor(Math.random()*249)+1;
 
-            if(Math.random() < 0.15) { // 15% 확률로 황금열쇠
+            if(Math.random() < 0.10) { // 10% 확률로 황금열쇠
                 const key = GOLD_KEYS[Math.floor(Math.random()*GOLD_KEYS.length)];
                 processKey(key, finalId);
             } else {
@@ -205,17 +205,17 @@
             
             switch(key.type) {
                 case 'bad': // 꽝: 뽑힌 곳 그대로 감
-                    showPopup("😱 꽝 (하지만 여행은 갑니다)", body + `\n\n📍 대상: ${REGION_DATA[targetId].name}`, "var(--danger)");
-                    executeConquer(targetId, " (꽝 미션)");
+                    showPopup("😱 꽝!! ", body + `\n\n📍 대상: ${REGION_DATA[targetId].name}`, "var(--danger)");
+                    executeConquer(targetId, " (꽝)");
                     break;
                 case 'retry': // 다시 돌리기: 무효화 후 재추첨
-                    showPopup("🔄 다시 돌리기 당첨!", body + "\n\n현재 추첨 결과는 무효화됩니다.", "var(--primary)");
+                    showPopup("🗝️ 황금카드 미션", body + "\n\n현재 추첨 결과는 무효화됩니다. 다시 돌아갑니다. 🔄", "var(--primary)");
                     addLog(`황금카드: ${REGION_DATA[targetId].name} 무효 및 재추첨`);
                     setTimeout(startRoulette, 1800);
                     break;
                 case 'stay': // 하루 쉬어가기: 지역 없이 휴식
-                    showPopup("🏠 하루 쉬어가기", body, "var(--success)");
-                    updateDisplay("오늘은 집에서 휴식!", "즐거운 휴일 보내세요.", "var(--success)");
+                    showPopup("🗝️ 황금카드 미션", body, "var(--success)");
+                    updateDisplay("이번 여행은 집에서 휴식! ☕", "즐거운 휴일 보내세요.", "var(--success)");
                     addLog("황금카드: 오늘 하루 쉬어가기");
                     break;
                 case 'budget': // 예산 미션
@@ -242,12 +242,12 @@
         function executeConquer(id, extra = "") {
             const region = REGION_DATA[id];
             if(conquered.has(id)) {
-                updateDisplay(region.name, "이미 방문한 지역입니다! 다음 추첨을 기다리세요.", "var(--danger)");
-                addLog(`중복 당첨: ${region.name}`);
+                updateDisplay(region.name, "이미 방문한 지역입니다! 다시 돌려주세요.", "var(--danger)");
+                addLog(`중복 여행지: ${region.name}`);
             } else {
                 conquered.add(id);
                 updateDisplay(region.name, region.desc + extra, "var(--success)");
-                addLog(`정복 성공: ${region.name}${extra}`);
+                addLog(`여행지 당첨: ${region.name}${extra}`);
                 saveData(); updateProgress();
             }
         }
