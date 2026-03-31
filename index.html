@@ -131,7 +131,7 @@
 
     <script>
         const REGION_DATA = {};
-        for(let i=1; i<=249; i++) REGION_DATA[i] = { name: `${i}번 지역`, desc: "이 지역의 새로운 매력을 정복하세요!" };
+        for(let i=1; i<=249; i++) REGION_DATA[i] = { name: `${i}번 지역`, desc: "이 지역으로 여행을 떠나세요!" };
 
         // 요청하신 로직으로 전면 수정
         const GOLD_KEYS = [
@@ -284,19 +284,19 @@
                 gridHtml += `<div onclick="handleMapClick(${i}, ${selectMode})" style="aspect-ratio:1; background:${conquered.has(i)?'var(--success)':'#EDF2F7'}; color:${conquered.has(i)?'white':'#CBD5E0'}; border-radius:4px; font-size:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:700;">${i}</div>`;
             }
             gridHtml += `</div>`;
-            showPopup(selectMode ? "📍 어디로 이동할까요?" : "🗺️ 전체 정복 현황", gridHtml);
+            showPopup(selectMode ? "📍 어디로 이동할까요?" : "🗺️ 전체 지도 현황", gridHtml);
         }
 
         function handleMapClick(i, selectMode) {
             const name = REGION_DATA[i].name;
             if(selectMode) {
-                if(conquered.has(i)) return alert("이미 정복한 지역입니다!");
-                if(confirm(`[${name}] 지역으로 즉시 이동하여 정복하시겠습니까?`)) {
+                if(conquered.has(i)) return alert("이미 여행한 지역입니다!");
+                if(confirm(`[${name}] 지역으로 즉시 이동하시겠습니까?`)) {
                     executeConquer(i, " (지정 이동)");
                     closeModal();
                 }
             } else {
-                alert(`${i}번: ${name}\n${conquered.has(i) ? '정복 완료 ✅' : '아직 정복 전 ❌'}`);
+                alert(`${i}번: ${name}\n${conquered.has(i) ? '여행 완료 ✅' : '아직 여행 전 ❌'}`);
             }
         }
 
@@ -304,13 +304,13 @@
             if(confirm("주의! 모든 모험 기록과 로그가 초기화됩니다. 계속하시겠습니까?")) {
                 conquered.clear(); gameLogs = [];
                 saveData(); updateProgress(); renderLogs();
-                updateDisplay("새로운 시작", "지도를 다시 채워보세요!", "var(--bg)");
+                updateDisplay("새로운 시작", "지도를 채워보세요!", "var(--bg)");
             }
         }
 
-        function showKeyList() { showPopup("🗝️ 황금카드 정보", "• 꽝: 뽑힌 곳 그대로 여행\n• 다시 돌리기: 무효 후 자동 재추첨\n• 지정 이동: 전체 지도에서 선택\n• 하루 쉬어가기: 지역 정복 없이 휴식\n• 미션: 예산/교통/현지인 맛집 조건 추가"); }
-        function showRules() { showPopup("📜 게임 규칙", "1. 추첨 결과에 따라 실제 지역을 여행합니다.\n2. 이미 정복한 곳은 다시 정복할 수 없습니다.\n3. 황금카드는 15%의 확률로 등장합니다.\n4. 249개 전 지역을 정복하면 최종 우승!"); }
-        function showUpdates() { showPopup("📢 업데이트 v5.3 (Final)", "• UI/UX 깔끔한 디자인으로 개선\n• 황금열쇠 로직 상세 요청사항 완벽 반영\n• 예산 미션 (15~30만 랜덤) 로직 고도화\n• 하루 쉬어가기 및 무효화 기능 추가"); }
+        function showKeyList() { showPopup("🗝️ 황금카드 정보", "• 꽝\n• 다시 돌리기: 무효 후 자동 재추첨\n• 지정 여행: 전체 지도에서 선택\n• 휴식: 지역 정복 없이 휴식\n• 예산 제한: 지정된 예산으로 여행\n• 교통수단제한: 대중교통만으로 이동\n• 현지인 맛집: 현지인 추천 맛집 이용"); }
+        function showRules() { showPopup("📜 게임 규칙", "1. 추첨 결과에 따른 지역을 여행합니다.\n2. 이미 정복한 곳은 다시 정복할 수 없습니다.\n3. 걸린 지역으로 무조건 여행을 떠나야 합니다.\n4. 황금카드는 10%의 확률로 등장합니다.\n5. 당일 여행 황금열쇠에 섬지역에 걸렸을 시 당일 여행은 무효처리 합니다.\n6. 기상악화 등 변수 발생 시 다음 기회로 미룹니다.\n7. 249개 전 지역을 여행하면 완료!"); }
+        function showUpdates() { showPopup("📢 업데이트 v1.0", "• UI/UX 깔끔한 디자인으로 개선\n• 사용자 로그인 시스템 적용"); }
 
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
         function updateProgress() { document.getElementById('display-progress').innerText = `🗺️ 정복: ${conquered.size}/249`; }
