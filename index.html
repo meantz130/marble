@@ -134,6 +134,35 @@
     <audio id="snd-stop" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
     <audio id="snd-gold" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3"></audio>
 
+    <script type="module">
+// Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-analytics.js";       
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyB7lpk0TPZzi-xEm9w90MEybpPissjKVHw",
+            authDomain: "marble-b74bf.firebaseapp.com",
+            databaseURL: "https://marble-b74bf.firebaseio.com", // 이게 꼭 있어야 함!
+            projectId: "marble-b74bf",
+            storageBucket: "marble-b74bf.firebasestorage.app",
+            messagingSenderId: "822876160956",
+            appId: "1:822876160956:web:bc73d43cd1c08c7366a1b9",
+            measurementId: "G-9G9Z0QDZ92"
+        };
+ // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+ // 기존 게임 로직에서 쓸 수 있게 전역 함수로 등록
+        window.fb_db = database;
+        window.fb_ref = ref;
+        window.fb_set = set;
+        window.fb_get = get;
+    </script>
+
     <script>
         const REGION_DATA = {};
         for(let i=1; i<=249; i++) REGION_DATA[i] = { name: `${i}번 지역`, desc: "이 지역으로 여행을 떠나세요!" };
@@ -569,11 +598,34 @@
 
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
         function updateProgress() { document.getElementById('display-progress').innerText = `🗺️ 정복: ${conquered.size}/249`; }
-        function saveData() { localStorage.setItem(`save_v5_3_${currentUser}`, JSON.stringify({c: [...conquered], l: gameLogs})); }
+        function saveData() {
+            if (!currentUser) return;
+            const data = {
+                conquered: Array.from(conquered),
+                logs: gameLogs
+            };
+// Firebase 서버의 users/닉네임 경로에 저장
+            window.fb_set(window.fb_ref(window.fb_db, 'users/' + currentUser), data);
+       }
+// 수정된 loadData 함수
         function loadData() {
-            const data = JSON.parse(localStorage.getItem(`save_v5_3_${currentUser}`));
-            if(data) { conquered = new Set(data.c); gameLogs = data.l; updateProgress(); }
+            window.fb_get(window.fb_ref(window.fb_db, 'users/' + currentUser)).then((snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                conquered = new Set(data.conquered || []);
+                gameLogs = data.logs || [];
+                updateProgress();
+                renderLogs();
+            } else {
+// 신규 유저일 경우 초기화
+                conquered = new Set();
+                gameLogs = [];
+                updateProgress();
+                renderLogs();
+                }
+            });
         }
+
     </script>
 </body>
 </html>
