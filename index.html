@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Meantz 한국여행마블 1.1v</title>
+    <title>Meantz 한국여행마블 1.2v</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <style>
         :root {
@@ -77,7 +77,7 @@
 <body>
 
     <div id="login-page">
-        <h1><span style="color: var(--danger);">M</span>eantz Korea Travel Marble 1.1v</h1>
+        <h1><span style="color: var(--danger);">M</span>eantz Korea Travel Marble 1.2v</h1>
         <p style="opacity:0.9; font-weight:500; margin-bottom:40px;">대한민국 방방곡곡 여행 보드게임</p>
         <div style="width:100%; max-width:300px;">
             <input type="text" id="user-id" placeholder="사용자 닉네임" style="width:100%; padding:18px; border-radius:16px; border:none; margin-bottom:12px; font-size:1.1rem; outline:none; text-align:center; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
@@ -87,7 +87,7 @@
 
     <div id="game-page" style="display:none; flex-direction:column; height:100vh;">
         <header>
-            <div class="header-title">Meantz 한국여행마블 1.1v</div>
+            <div class="header-title">Meantz 한국여행마블 1.2v</div>
             <div style="display:flex; gap:8px;">
                 <button class="btn-sub" style="background:#FFF5F5; color:var(--danger); border-color:#FED7D7;" onclick="resetProgress()">여행지 초기화</button>
                 <button class="btn-sub" onclick="location.reload()">로그아웃</button>
@@ -438,6 +438,15 @@
             { threshold: 100, title: "👑 전설의 탐험왕", desc: "249곳 완전 정복! 당신은 대한민국의 전설입니다! (100%)" }
         ];
 
+        // 2. 독도 데이터
+        const DOKDO_DATA = {
+            name: "🇰🇷 대한민국 동쪽 끝, 독도",
+            desc: "0.01%의 확률을 뚫고 동해의 외로운 섬, 독도를 뽑으셨습니다! 울릉도 동남쪽 87.4km에 위치한 독도는 천연기념물 제336호로 지정된 소중한 우리 영토입니다. 맑은 날씨와 천운이 따라야만 입도할 수 있는 이곳을 뽑으신 당신은 진정한 행운아입니다! 🌊⛰️"
+        };
+
+        // 3. 변수 추가 (기존 conquered 선언 근처에 추가)
+        let hasDokdo = false;
+
         // 요청하신 로직으로 전면 수정
         const GOLD_KEYS = [
             { name: "꽝", type: "bad", desc: "꽝! 뽑힌 곳을 그대로 갑니다. 😱" },
@@ -470,10 +479,26 @@
             clearInterval(spinTimer);
             document.getElementById('snd-spin').pause();
             let speed = 50;
+            
             const slowdown = () => {
-                document.getElementById('roulette-text').innerText = REGION_DATA[Math.floor(Math.random()*249)+1].name;
-                if(speed < 400) { speed *= 1.3; setTimeout(slowdown, speed); }
-                else finalize();
+                document.getElementById('roulette-text').innerText = REGION_DATA[Math.floor(Math.random() * 249) + 1].name;
+                if (speed < 400) { speed *= 1.3; setTimeout(slowdown, speed);
+                } else {
+                    // 독도 체크: 0.01% 확률 + 아직 독도 안 뽑았을 때
+                    if (Math.random() <= 0.0001 && !hasDokdo) {
+                        hasDokdo = true; // 이제 다시는 안 나옴
+                        document.getElementById('roulette-text').innerText = "✨ 독도 발견! ✨";
+                        document.getElementById('info-name').innerText = DOKDO_DATA.name;
+                        document.getElementById('info-desc').innerText = DOKDO_DATA.desc;
+                        document.getElementById('snd-gold').play();
+                        addLog(`🎊 [특수] 평생 한 번뿐인 행운! 독도에 도착했습니다!`);
+                        saveData();
+                        document.getElementById('roll-btn').disabled = false;
+                        document.getElementById('roll-btn').innerText = "🎲 여행지 추첨하기 🎲";
+                    } else {
+                        finalize(); // 일반 당첨 로직
+                    }
+                }
             };
             slowdown();
         }
@@ -605,7 +630,7 @@
 
         function showKeyList() { showPopup("🗝️ 황금카드 정보", "• [황금열쇠: 꽝]\n• [황금열쇠: 다시 돌리기] 무효 후 자동 재추첨\n• [황금열쇠: 지정 여행] 전체 지도에서 선택\n• [황금열쇠: 휴식] 지역 정복 없이 휴식\n• [황금열쇠: 예산 제한] 지정된 예산으로 여행\n• [황금열쇠: 교통수단제한] 대중교통만으로 이동\n• [황금열쇠: 현지인 맛집] 현지인 추천 맛집 이용"); }
         function showRules() { showPopup("📜 게임 규칙", "1. 대한민국 지역을 카토그램식으로 나눈 지도형식입니다.\n2. 추첨 결과에 따른 지역을 여행합니다.\n3. 이미 정복한 곳은 다시 정복할 수 없습니다.\n4. 걸린 지역으로 무조건 여행을 떠나야 합니다.\n5. 황금카드는 10%의 확률로 등장합니다.\n6. 당일 여행 황금열쇠에 섬지역에 걸렸을 시 당일 여행은 무효처리 합니다.\n7. 기상악화 등 변수 발생 시 다음 기회로 미룹니다.\n8. 249개 전 지역을 여행하면 완료!"); }
-        function showUpdates() { showPopup("📢 업데이트 v1.1", "• 핸드폰이나 컴퓨터 다른 환경에서 접속해서도 값이 같게 설정\n• 지역에 대한 정보 지속 업데이트"); }
+        function showUpdates() { showPopup("📢 업데이트 v1.2", "• 지역에 대한 정보 업데이트\n• 다녀온 횟 수에 따른 업적 시스템 적용"); }
 
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
         function updateProgress() { 
@@ -636,11 +661,13 @@
 // [중요] saveData 함수를 아래 내용으로 교체
         function saveData() {
             if (!currentUser || !window.fb_db) return; // Firebase 준비 안 됐으면 중단
-
-            const data = {
+            window.fb_set(window.fb_ref(window.fb_db, 'users/' + currentUser), {
                 conquered: Array.from(conquered),
-                logs: gameLogs
-            };
+                logs: gameLogs,
+                hasDokdo: hasDokdo // 이 줄을 추가하여 저장
+            });
+         }
+
 // window.fb_ref와 window.fb_set을 사용하여 저장
             window.fb_set(window.fb_ref(window.fb_db, 'users/' + currentUser), data)
                 .then(() => console.log("저장 성공!"))
@@ -668,17 +695,23 @@
                     const data = snapshot.val();
                     conquered = new Set(data.conquered || []);
                     gameLogs = data.logs || [];
+                    hasDokdo = data.hasDokdo || false; // 저장된 값을 불러오고, 없으면 false
                     updateProgress();
                     renderLogs();
-                    console.log("데이터 로드 완료");
+                    // console.log("데이터 로드 완료") -> 삭제해도 무방합니다.
                 } else {
-                    console.log("기존 데이터 없음 - 초기화");
+                    // 데이터가 없는 신규 유저일 경우 초기화
+                    // console.log("기존 데이터 없음 - 초기화");
                     conquered = new Set();
                     gameLogs = [];
+                    hasDokdo = false;
                     updateProgress();
                     renderLogs();
                 }
-            }).catch((e) => console.error("로드 실패:", e));
+            }).catch((e) => {
+                console.error("로드 실패:", e);
+                alert("데이터를 불러오지 못했습니다.");
+            });
         }
     </script>
 </body>
