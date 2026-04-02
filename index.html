@@ -496,7 +496,7 @@
                 if (speed < 400) { speed *= 1.3; setTimeout(slowdown, speed);
                 } else {
                     // 독도 체크: 0.01% 확률 + 아직 독도 안 뽑았을 때
-                    if (Math.random() <= 0.0001 && !hasDokdo) {
+                    if (Math.random() <= 199 && !hasDokdo) {
                         hasDokdo = true; // 이제 다시는 안 나옴
                         renderStatus();
                         document.getElementById('roulette-text').innerText = "✨ 독도 발견! ✨";
