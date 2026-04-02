@@ -691,6 +691,16 @@
             conquered = new Set();
             gameLogs = [];
             hasDokdo = false; // [추가] 독도 당첨 여부 초기화
+
+            const rollBtn = document.getElementById('roll-btn');
+            rollBtn.innerText = "🎲 여행지 추첨하기 🎲";
+            rollBtn.classList.remove('btn-stop'); // 빨간색 스타일 제거
+            rollBtn.disabled = false; // 버튼 비활성화 해제
+            isRolling = false; // 추첨 상태 변수 초기화
+
+            document.getElementById('roulette-text').innerText = "어디로 갈까요?";
+            document.getElementById('info-name').innerText = "여행지를 추첨해주세요";
+            document.getElementById('info-desc').innerText = "버튼을 누르면 전국 249곳 중 한 곳으로 떠납니다.";
             // 2. UI 즉시 갱신
             updateProgress();
             renderLogs();
