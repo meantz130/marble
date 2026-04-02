@@ -661,18 +661,21 @@
 // [중요] saveData 함수를 아래 내용으로 교체
         function saveData() {
             if (!currentUser || !window.fb_db) return; // Firebase 준비 안 됐으면 중단
-            window.fb_set(window.fb_ref(window.fb_db, 'users/' + currentUser), {
+            const data = {
                 conquered: Array.from(conquered),
                 logs: gameLogs,
-                hasDokdo: hasDokdo // 이 줄을 추가하여 저장
-            });
-         }
-
-// window.fb_ref와 window.fb_set을 사용하여 저장
+                hasDokdo: hasDokdo // 독도 획득 상태 포함
+            };
+            
+            // Firebase에 데이터 쓰기 실행
             window.fb_set(window.fb_ref(window.fb_db, 'users/' + currentUser), data)
-                .then(() => console.log("저장 성공!"))
-                .catch((e) => console.error("저장 실패:", e));
-       }
+                .then(() => {
+                    console.log("저장 성공!");
+                })
+                .catch((e) => {
+                    console.error("저장 실패:", e);
+                });
+        }     
 
         function handleLogin() {
             const id = document.getElementById('user-id').value.trim();
@@ -695,7 +698,7 @@
                     const data = snapshot.val();
                     conquered = new Set(data.conquered || []);
                     gameLogs = data.logs || [];
-                    hasDokdo = data.hasDokdo || false; // 저장된 값을 불러오고, 없으면 false
+                    hasDokdo = data.hasDokdo || false; // 독도 획득 여부 불러오기
                     updateProgress();
                     renderLogs();
                     // console.log("데이터 로드 완료") -> 삭제해도 무방합니다.
