@@ -508,8 +508,8 @@
                 document.getElementById('roulette-text').innerText = REGION_DATA[Math.floor(Math.random() * 249) + 1].name;
                 if (speed < 400) { speed *= 1.3; setTimeout(slowdown, speed);
                 } else {
-                    // 독도 체크: 0.01% 확률 + 아직 독도 안 뽑았을 때 (테스트 중이라면 0.001을 1로 변경)
-                    if (Math.random() <= 0.001 && !hasDokdo) {
+                    // 독도 체크: 0.01% 확률 + 아직 독도 안 뽑았을 때 (테스트 중이라면 0.01을 1로 변경)
+                    if (Math.random() <= 0.01 && !hasDokdo) {
                         isRolling = false; // 룰렛 정지
 
                         // 독도 당첨 알림 (대기 상태)
@@ -749,8 +749,12 @@
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
         
         function updateProgress() { 
-            const total = 249;
-            const count = conquered.size;
+            // 1. 독도 발견 여부에 따라 전체 지역 수(total) 동적 변경
+            const total = hasDokdo ? 250 : 249;
+            
+            // 2. 정복한 지역 수(count) 계산: 일반 지역 개수 + (독도 다녀왔으면 1 추가, 아니면 0)
+            const count = conquered.size + (hasDokdo ? 1 : 0);
+            
             const percent = Math.floor((count / total) * 100);
 
             // 상단 텍스트 업데이트
