@@ -469,11 +469,19 @@
             { name: "현지인 맛집 추천", type: "local", desc: "정보 없이 떠나기! 현지인 맛집만 이용하며 여행하세요. 🍝" }
         ];
 
+        // pendingRegion: 당첨되었으나 아직 다녀오지 않은 지역을 저장
         let currentUser = null, conquered = new Set(), gameLogs = [], isRolling = false, spinTimer = null;
+        let pendingRegion = null; 
 
         function toggleRoulette() {
-            if(isRolling) stopRoulette();
-            else startRoulette();
+            // 여행 대기 중인 지역이 있다면 다녀왔음을 확인하는 기능으로 작동
+            if (pendingRegion) {
+                confirmVisit();
+            } else if(isRolling) {
+                stopRoulette();
+            } else {
+                startRoulette();
+            }
         }
 
         function startRoulette() {
@@ -500,20 +508,15 @@
                         hasDokdo = true; // 이제 다시는 안 나옴
                         isRolling = false; // 1. 추첨 상태 해제
 
-                        // 2. 버튼 UI 복구 (빨간색 불 끄기 및 텍스트 변경)
-                        const rollBtn = document.getElementById('roll-btn');
-                        rollBtn.innerText = "🎲 여행지 추첨하기 🎲";
-                        rollBtn.classList.remove('btn-stop'); // 이 줄이 빨간색을 지워줍니다.
-                        rollBtn.disabled = false;
-
-                        // 3. 독도 정보 표시
+                        // 독도 정보 표시
                         document.getElementById('roulette-text').innerText = "✨ 독도 발견! ✨";
                         document.getElementById('info-name').innerText = DOKDO_DATA.name;
                         document.getElementById('info-desc').innerText = DOKDO_DATA.desc;
-
                         if(document.getElementById('snd-gold')) document.getElementById('snd-gold').play();
-                        addLog(`🎊 [특수] 평생 한 번뿐인 행운! 독도 여행을 뽑았습니다!`);
 
+                        // 독도는 뽑자마자 특수하게 처리 (대기 없이 바로 성공 처리하거나 필요에 따라 변경 가능)
+                        addLog(`🎊 [특수] 평생 한 번뿐인 행운! 독도 여행을 뽑았습니다!`);
+                        resetRollButton(); // 버튼 원상복구
                         renderStatus();
                         saveData();
                     } else {
@@ -526,19 +529,16 @@
 
         function finalize() {
             isRolling = false;
-            document.getElementById('roll-btn').innerText = "🎲 여행지 추첨하기 🎲";
-            document.getElementById('roll-btn').classList.remove('btn-stop');
             document.getElementById('snd-stop').play();
 
             const finalId = Math.floor(Math.random() * 249) + 1;
 
-            if(Math.random() < 0.10) { // 10% 확률로 황금열쇠
+            if(Math.random() < 0.10) { 
                 const key = GOLD_KEYS[Math.floor(Math.random()*GOLD_KEYS.length)];
                 processKey(key, finalId);
             } else {
                 executeConquer(finalId);
             }
-            // [이 줄을 추가] 정복 결과가 반영된 지도를 새로 그립니다.
             renderStatus();
         }
 
@@ -577,6 +577,7 @@
                 case 'select': // 지정 이동
                     showPopup("🗝️ 황금카드 당첨!", body, "var(--gold)");
                     addLog("황금카드: 지정 이동권 획득");
+                    resetRollButton();
                     openMap(true);
                     break;
             }
@@ -587,12 +588,46 @@
             if(conquered.has(id)) {
                 updateDisplay(region.name, "이미 방문한 지역입니다! 다시 돌려주세요.", "var(--danger)");
                 addLog(`중복 여행지: ${region.name}`);
+                resetRollButton();
             } else {
-                conquered.add(id);
-                updateDisplay(region.name, region.desc + extra, "var(--success)");
-                addLog(`여행지 당첨: ${region.name}${extra}`);
-                saveData(); updateProgress();
+                pendingRegion = { id: id, extra: extra }; // 대기 상태 지정
+                updateDisplay(region.name, region.desc + "\n\n⚠️ 다녀온 후 아래 버튼을 눌러 여행을 완료하세요!", "var(--danger)");
+                addLog(`여행지 당첨(미방문): ${region.name}${extra}`);
+
+                // 버튼을 '다녀왔습니다'용 빨간 버튼으로 변경
+                const rollBtn = document.getElementById('roll-btn');
+                rollBtn.innerText = "✅ 여행 다녀왔습니다 ✅";
+                rollBtn.classList.remove('btn-stop');
+                rollBtn.style.background = "var(--danger)";
+                
+                saveData(); 
             }
+        }
+
+        // [신규] 여행을 다녀왔음을 확인하고 초록불로 바꾸는 함수
+        function confirmVisit() {
+            if (!pendingRegion) return;
+            const id = pendingRegion.id;
+            const region = REGION_DATA[id];
+
+            conquered.add(id); // 이제서야 정복 완료 처리
+            addLog(`여행 완료: ${region.name}${pendingRegion.extra}`);
+
+            pendingRegion = null; // 대기 상태 해제
+
+            updateDisplay("여행 완료!", "새로운 여행지를 추첨해보세요.", "var(--success)");
+
+            resetRollButton();
+            updateProgress();
+            saveData();
+        }
+
+        // 룰렛 버튼을 원래 상태로 되돌리는 함수
+        function resetRollButton() {
+            const rollBtn = document.getElementById('roll-btn');
+            rollBtn.innerText = "🎲 여행지 추첨하기 🎲";
+            rollBtn.classList.remove('btn-stop');
+            rollBtn.style.background = "var(--primary)";
         }
 
         function updateDisplay(name, desc, color) {
@@ -624,7 +659,18 @@
         function openMap(selectMode = false) {
             let gridHtml = `<div style="display:grid; grid-template-columns:repeat(10, 1fr); gap:4px; padding:10px;">`;
             for(let i=1; i<=249; i++) {
-                gridHtml += `<div onclick="handleMapClick(${i}, ${selectMode})" style="aspect-ratio:1; background:${conquered.has(i)?'var(--success)':'#EDF2F7'}; color:${conquered.has(i)?'white':'#CBD5E0'}; border-radius:4px; font-size:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:700;">${i}</div>`;
+                let bg = '#EDF2F7';
+                let color = '#CBD5E0';
+
+                if (conquered.has(i)) {
+                    bg = 'var(--success)'; // 다녀온 곳 (초록)
+                    color = 'white';
+                } else if (pendingRegion && pendingRegion.id === i) {
+                    bg = 'var(--danger)'; // 현재 여행해야 할 곳 (빨강)
+                    color = 'white';
+                }
+                
+                gridHtml += `<div onclick="handleMapClick(${i}, ${selectMode})" style="aspect-ratio:1; background:${bg}; color:${color}; border-radius:4px; font-size:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:700;">${i}</div>`;
             }
             gridHtml += `</div>`;
             showPopup(selectMode ? "📍 어디로 이동할까요?" : "🗺️ 전체 지도 현황", gridHtml);
@@ -634,12 +680,16 @@
             const name = REGION_DATA[i].name;
             if(selectMode) {
                 if(conquered.has(i)) return alert("이미 여행한 지역입니다!");
+                if(pendingRegion) return alert("현재 다녀와야 할 여행지가 있습니다!");
                 if(confirm(`[${name}] 지역으로 즉시 이동하시겠습니까?`)) {
                     executeConquer(i, " (지정 이동)");
                     closeModal();
                 }
             } else {
-                alert(`${i}번: ${name}\n${conquered.has(i) ? '여행 완료 ✅' : '아직 여행 전 ❌'}`);
+                let statusMsg = '아직 여행 전 ❌';
+                if (conquered.has(i)) statusMsg = '여행 완료 ✅';
+                if (pendingRegion && pendingRegion.id === i) statusMsg = '현재 여행 예정 (미방문) 🚨';
+                alert(`${i}번: ${name}\n${statusMsg}`);                
             }
         }
 
@@ -648,6 +698,7 @@
         function showUpdates() { showPopup("📢 업데이트 v1.2", "• 지역에 대한 정보 업데이트\n• 다녀온 횟 수에 따른 업적 시스템 적용\n• 독도추가: 0.1% 확률로 등장합니다."); }
 
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        
         function updateProgress() { 
             const total = 249;
             const count = conquered.size;
@@ -700,10 +751,12 @@
             conquered = new Set();
             gameLogs = [];
             hasDokdo = false; // [추가] 독도 당첨 여부 초기화
+            pendingRegion = null;
 
             // 2. UI 즉시 갱신
             updateProgress();
             renderLogs();
+            resetRollButton();
             updateDisplay("어디로 갈까요?", "여행지 추첨하기 버튼을 눌러 여행을 시작하세요.", "var(--bg)");
             if (typeof renderStatus === 'function') {
                 renderStatus(); // 지도 현황판에서 독도 칸 숨기기 및 색상 초기화
@@ -720,11 +773,11 @@
                 conquered: Array.from(conquered),
                 logs: gameLogs,
                 hasDokdo: hasDokdo // 독도 획득 상태 포함
+                pendingRegion: pendingRegion
             };
             
             // Firebase에 데이터 쓰기 실행
             window.fb_set(window.fb_ref(window.fb_db, 'users/' + currentUser), data)
-                .then(() => console.log("데이터 초기화 저장 완료"))
                 .catch((e) => console.error("저장 실패:", e));
         }
 
@@ -736,11 +789,10 @@
             document.getElementById('login-page').style.display = 'none';
             document.getElementById('game-page').style.display = 'flex';
             document.getElementById('display-user').innerText = `👤 ${id}`;
-// 데이터를 먼저 불러오고 화면을 갱신합니다.
-            loadData(); 
+            loadData();  
         }
         
-// 수정된 loadData 함수
+        // 수정된 loadData 함수
         function loadData() {
             if (!currentUser || !window.fb_db) return;
 
@@ -749,17 +801,29 @@
                     const data = snapshot.val();
                     conquered = new Set(data.conquered || []);
                     gameLogs = data.logs || [];
-                    hasDokdo = data.hasDokdo || false; // 독도 획득 여부 불러오기
+                    hasDokdo = data.hasDokdo || false; 
+                    pendingRegion = data.pendingRegion || null; // 대기 중인 지역 불러오기
+
+                    // 만약 다녀와야 할 지역이 있다면 버튼과 화면을 세팅
+                    if (pendingRegion) {
+                        const region = REGION_DATA[pendingRegion.id];
+                        updateDisplay(region.name, region.desc + "\n\n⚠️ 다녀온 후 아래 버튼을 눌러 여행을 완료하세요!", "var(--danger)");
+                        const rollBtn = document.getElementById('roll-btn');
+                        rollBtn.innerText = "✅ 여행 다녀왔습니다 ✅";
+                        rollBtn.style.background = "var(--danger)";
+                    } else {
+                        resetRollButton();
+                    }
                     updateProgress();
                     renderLogs();
-                    renderStatus();
-                    // console.log("데이터 로드 완료") -> 삭제해도 무방합니다.
+                    if (typeof renderStatus === 'function') renderStatus();
                 } else {
                     // 데이터가 없는 신규 유저일 경우 초기화
                     // console.log("기존 데이터 없음 - 초기화");
                     conquered = new Set();
                     gameLogs = [];
                     hasDokdo = false;
+                    pendingRegion = null;
                     updateProgress();
                     renderLogs();
                 }
