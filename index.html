@@ -583,6 +583,7 @@
             }
         }
 
+        // [변경됨] 바로 완료되지 않고 '대기(pending)' 상태로 전환
         function executeConquer(id, extra = "") {
             const region = REGION_DATA[id];
             if(conquered.has(id)) {
@@ -593,7 +594,7 @@
                 pendingRegion = { id: id, extra: extra }; // 대기 상태 지정
                 updateDisplay(region.name, region.desc + "\n\n⚠️ 다녀온 후 아래 버튼을 눌러 여행을 완료하세요!", "var(--danger)");
                 addLog(`여행지 당첨(미방문): ${region.name}${extra}`);
-
+                
                 // 버튼을 '다녀왔습니다'용 빨간 버튼으로 변경
                 const rollBtn = document.getElementById('roll-btn');
                 rollBtn.innerText = "✅ 여행 다녀왔습니다 ✅";
@@ -609,14 +610,14 @@
             if (!pendingRegion) return;
             const id = pendingRegion.id;
             const region = REGION_DATA[id];
-
+            
             conquered.add(id); // 이제서야 정복 완료 처리
             addLog(`여행 완료: ${region.name}${pendingRegion.extra}`);
-
+            
             pendingRegion = null; // 대기 상태 해제
-
+            
             updateDisplay("여행 완료!", "새로운 여행지를 추첨해보세요.", "var(--success)");
-
+            
             resetRollButton();
             updateProgress();
             saveData();
@@ -661,7 +662,7 @@
             for(let i=1; i<=249; i++) {
                 let bg = '#EDF2F7';
                 let color = '#CBD5E0';
-
+                
                 if (conquered.has(i)) {
                     bg = 'var(--success)'; // 다녀온 곳 (초록)
                     color = 'white';
@@ -689,7 +690,7 @@
                 let statusMsg = '아직 여행 전 ❌';
                 if (conquered.has(i)) statusMsg = '여행 완료 ✅';
                 if (pendingRegion && pendingRegion.id === i) statusMsg = '현재 여행 예정 (미방문) 🚨';
-                alert(`${i}번: ${name}\n${statusMsg}`);                
+                alert(`${i}번: ${name}\n${statusMsg}`);
             }
         }
 
@@ -747,36 +748,32 @@
 
         function resetData() {
             if (!confirm("모든 여행 기록(독도 포함)과 로그를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) return;
-            // 1. 모든 상태 변수 초기화
             conquered = new Set();
             gameLogs = [];
-            hasDokdo = false; // [추가] 독도 당첨 여부 초기화
+            hasDokdo = false;
             pendingRegion = null;
 
-            // 2. UI 즉시 갱신
             updateProgress();
             renderLogs();
             resetRollButton();
             updateDisplay("어디로 갈까요?", "여행지 추첨하기 버튼을 눌러 여행을 시작하세요.", "var(--bg)");
             if (typeof renderStatus === 'function') {
-                renderStatus(); // 지도 현황판에서 독도 칸 숨기기 및 색상 초기화
+                renderStatus(); 
             }
-            // 3. 서버(Firebase)에 초기화된 상태 덮어쓰기
             saveData();
             alert("여행 기록이 모두 초기화되었습니다. 다시 도전해 보세요!");
         }
         
-        // [중요] saveData 함수를 아래 내용으로 교체
+        // [변경됨] 파이어베이스에 현재 대기 중인 지역도 같이 저장
         function saveData() {
-            if (!currentUser || !window.fb_db) return; // Firebase 준비 안 됐으면 중단
+            if (!currentUser || !window.fb_db) return; 
             const data = {
                 conquered: Array.from(conquered),
                 logs: gameLogs,
-                hasDokdo: hasDokdo // 독도 획득 상태 포함
-                pendingRegion: pendingRegion
+                hasDokdo: hasDokdo,
+                pendingRegion: pendingRegion 
             };
             
-            // Firebase에 데이터 쓰기 실행
             window.fb_set(window.fb_ref(window.fb_db, 'users/' + currentUser), data)
                 .catch((e) => console.error("저장 실패:", e));
         }
@@ -789,10 +786,10 @@
             document.getElementById('login-page').style.display = 'none';
             document.getElementById('game-page').style.display = 'flex';
             document.getElementById('display-user').innerText = `👤 ${id}`;
-            loadData();  
+            loadData(); 
         }
         
-        // 수정된 loadData 함수
+         // [변경됨] 파이어베이스에서 데이터를 불러올 때 대기 중인 상태도 복구
         function loadData() {
             if (!currentUser || !window.fb_db) return;
 
@@ -814,12 +811,11 @@
                     } else {
                         resetRollButton();
                     }
+
                     updateProgress();
                     renderLogs();
                     if (typeof renderStatus === 'function') renderStatus();
                 } else {
-                    // 데이터가 없는 신규 유저일 경우 초기화
-                    // console.log("기존 데이터 없음 - 초기화");
                     conquered = new Set();
                     gameLogs = [];
                     hasDokdo = false;
