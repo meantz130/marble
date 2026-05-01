@@ -30,18 +30,24 @@
         
         /* 지역 정보 카드 디자인 개선 */
         #region-info-card {
-            background: var(--card); padding: 35px 20px; border-radius: 20px;
+            background: var(--card); 
+            padding: 20px 15px; /* 패딩 축소 (기존 35px 20px) */
+            border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.03); text-align: center;
-            min-height: 200px; display: flex; flex-direction: column; justify-content: center;
+            min-height: 130px; /* 최소 높이 대폭 축소 (기존 200px) */
+            display: flex; flex-direction: column; justify-content: center;
             border: 1px solid rgba(0,0,0,0.05); flex-shrink: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
             
-        #info-name { font-size: 1.4rem; font-weight: 850; color: var(--primary); margin-bottom: 15px; letter-spacing: -1px; }
-        #info-desc { font-size: 0.8rem; color: var(--text-sub); line-height: 1.7; word-break: keep-all; font-weight: 500; }
+        #info-name { font-size: 1.3rem; /* 폰트 살짝 축소 */ font-weight: 850; color: var(--primary); margin-bottom: 8px; /* 여백 축소 */ letter-spacing: -1px; }
+        #info-desc { font-size: 0.8rem; color: var(--text-sub); line-height: 1.5; /* 줄간격 축소 */ word-break: keep-all; font-weight: 500; }
 
         /* 로그 컨테이너 디자인 개선 */
+        /* 로그 컨테이너 디자인 개선 (비중과 최소 높이 확대) */
         #live-log-container { 
-            flex: 1; min-height: 100px; background: rgba(255,255,255,0.6); border-radius: 20px; border: 1px solid rgba(0,0,0,0.03); 
+            flex: 1.5; /* 유연하게 늘어나는 비율 증가 (기존 1) */
+            min-height: 180px; /* 최소 보장 높이 대폭 확대 (기존 100px) */
+            background: rgba(255,255,255,0.6); border-radius: 20px; border: 1px solid rgba(0,0,0,0.03); 
             display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(10px);
         }
         .log-header { padding: 10px 15px; background: rgba(0,0,0,0.02); font-size: 0.75rem; font-weight: 800; color: #ADB5BD; border-bottom: 1px solid rgba(0,0,0,0.03); text-transform: uppercase; }
@@ -49,12 +55,11 @@
         .log-item { padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.02); display: flex; align-items: flex-start; }
         .log-time { color: #CED4DA; margin-right: 10px; font-weight: 600; font-size: 0.75rem; padding-top: 2px; }
 
-        /* 하단 조작 패널 */
-        /* 기존 .controls 부분을 아래 코드로 교체하세요 */
-        .controls { background: white; padding: 20px 20px 35px; border-radius: 32px 32px 0 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.05); flex-shrink: 0; }
-        #roulette-text { font-size: 1.4rem; font-weight: 900; color: var(--primary); height: 50px; display: flex; align-items: center; justify-content: center; background: #F8F9FA; border-radius: 16px; margin-bottom: 15px; border: 1px solid #F1F3F5; }
+        /* 하단 조작 패널 (여백 및 버튼 높이 살짝 다이어트) */
+        .controls { background: white; padding: 15px 20px 25px; /* 하단 및 상단 패딩 축소 (기존 20px 20px 35px) */ border-radius: 24px 24px 0 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.05); flex-shrink: 0; }
+        #roulette-text { font-size: 1.3rem; font-weight: 900; color: var(--primary); height: 45px; /* 높이 축소 (기존 50px) */ display: flex; align-items: center; justify-content: center; background: #F8F9FA; border-radius: 16px; margin-bottom: 10px; border: 1px solid #F1F3F5; }
                     
-        .btn-main { width: 100%; height: 50px; background: var(--primary); color: white; border: none; border-radius: 18px; font-size: 0.9rem; font-weight: 800; box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3); transition: transform 0.1s; }
+        .btn-main { width: 100%; height: 45px; /* 높이 축소 (기존 50px) */ background: var(--primary); color: white; border: none; border-radius: 16px; font-size: 0.9rem; font-weight: 800; box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3); transition: transform 0.1s; }
         .btn-main:active { transform: scale(0.98); }
         .btn-stop { background: var(--danger) !important; box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3) !important; }
 
@@ -504,7 +509,7 @@
                 if (speed < 400) { speed *= 1.3; setTimeout(slowdown, speed);
                 } else {
                     // 독도 체크: 0.01% 확률 + 아직 독도 안 뽑았을 때 (테스트 중이라면 0.001을 1로 변경)
-                    if (Math.random() <= 1 && !hasDokdo) {
+                    if (Math.random() <= 0.001 && !hasDokdo) {
                         isRolling = false; // 룰렛 정지
 
                         // 독도 당첨 알림 (대기 상태)
