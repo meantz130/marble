@@ -504,9 +504,9 @@
                 if (speed < 400) { speed *= 1.3; setTimeout(slowdown, speed);
                 } else {
                     // 독도 체크: 0.01% 확률 + 아직 독도 안 뽑았을 때
-                    if (Math.random() <= 0.001 && !hasDokdo) {
+                    if (Math.random() <= 1 && !hasDokdo) {
                         hasDokdo = true; // 이제 다시는 안 나옴
-                        isRolling = false; // 1. 추첨 상태 해제
+                        isRolling = false; // 추첨 상태 해제
 
                         // 독도 정보 표시
                         document.getElementById('roulette-text').innerText = "✨ 독도 발견! ✨";
@@ -658,7 +658,17 @@
         }
 
         function openMap(selectMode = false) {
-            let gridHtml = `<div style="display:grid; grid-template-columns:repeat(10, 1fr); gap:4px; padding:10px;">`;
+            let gridHtml = ``;
+
+            // 독도를 뽑았을 경우 플레이어에게 알려주는 상단 메시지 추가
+            if (hasDokdo) {
+                gridHtml += `<div style="margin-bottom:12px; font-size:0.9rem; color:#D4AC0D; font-weight:800; text-align:center; background:#FFF9E3; padding:8px; border-radius:10px; border:1px solid #F1C40F;">
+                    ✨ 숨겨진 250번째 지역 '독도'가 활성화되었습니다! ✨
+                </div>`;
+            }
+
+            gridHtml += `<div style="display:grid; grid-template-columns:repeat(10, 1fr); gap:4px; padding:10px;">`;
+            
             for(let i=1; i<=249; i++) {
                 let bg = '#EDF2F7';
                 let color = '#CBD5E0';
@@ -673,11 +683,26 @@
                 
                 gridHtml += `<div onclick="handleMapClick(${i}, ${selectMode})" style="aspect-ratio:1; background:${bg}; color:${color}; border-radius:4px; font-size:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:700;">${i}</div>`;
             }
+
+            // 독도를 뽑은 경우 250번째 칸 (독도) 추가 생성
+            if (hasDokdo) {
+                gridHtml += `<div onclick="handleMapClick(250, ${selectMode})" style="aspect-ratio:1; background:linear-gradient(135deg, #FFF9E3, #F1C40F); color:#856404; border-radius:4px; font-size:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:900; border:1px solid #D4AC0D;" title="독도">250</div>`;
+            }
+                
             gridHtml += `</div>`;
             showPopup(selectMode ? "📍 어디로 이동할까요?" : "🗺️ 전체 지도 현황", gridHtml);
         }
 
         function handleMapClick(i, selectMode) {
+            // 250번(독도) 클릭 시 예외 처리
+            if (i === 250) {
+                if(selectMode) {
+                    return alert("독도는 황금카드로 갈 수 없는 아주 특별한 장소입니다! 🚫");
+                } else {
+                    return alert(`250번: ${DOKDO_DATA.name}\n여행 완료 (특별 업적) 🌟`);
+                }
+            }
+
             const name = REGION_DATA[i].name;
             if(selectMode) {
                 if(conquered.has(i)) return alert("이미 여행한 지역입니다!");
